@@ -41,15 +41,17 @@
       overflow-x: hidden;
     }
 
-    /* ===== FLOATING PETALS CANVAS ===== */
+    /* ===== FLOATING PETALS CANVAS — only over invitation ===== */
     #petals-canvas {
-      position: fixed;
+      position: absolute;        /* relative to .invitation-section */
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 9999; /* Increased to appear above everything */
+      z-index: 5;
+      border-radius: inherit;   /* matches card if needed, but we keep it over section */
+      display: block;
     }
 
     /* ===== VIDEO HERO ===== */
@@ -59,7 +61,7 @@
       overflow: hidden;
       position: relative;
       background: #1a0a12;
-      z-index: 1; /* Give it a z-index but lower than petals */
+      z-index: 1;
     }
 
     .video-hero video {
@@ -83,7 +85,6 @@
       z-index: 2;
     }
 
-    /* Vignette border */
     .video-vignette {
       position: absolute;
       inset: 0;
@@ -189,12 +190,13 @@
       align-items: center;
       padding: 4rem 1.5rem 5rem;
       position: relative;
-      z-index: 2; /* Higher than video but lower than petals */
+      z-index: 2;
       background:
         radial-gradient(ellipse at 20% 10%, rgba(255, 180, 210, 0.45) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 90%, rgba(255, 160, 200, 0.35) 0%, transparent 50%),
         radial-gradient(ellipse at 60% 40%, rgba(255, 220, 235, 0.3) 0%, transparent 40%),
         linear-gradient(160deg, #ffe4f0 0%, #ffd0e5 40%, #ffe8f2 100%);
+      overflow: hidden;  /* keeps petals inside, no scrollbar from canvas */
     }
 
     /* Decorative blobs behind card */
@@ -205,6 +207,7 @@
       border-radius: 50%;
       filter: blur(60px);
       pointer-events: none;
+      z-index: 1;
     }
 
     .invitation-section::before {
@@ -239,6 +242,7 @@
       position: relative;
       overflow: hidden;
       animation: cardEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+      z-index: 3;  /* above the blobs and canvas */
     }
 
     @keyframes cardEntrance {
@@ -285,7 +289,7 @@
       margin-bottom: 1.4rem;
       box-shadow: 0 2px 12px rgba(212, 168, 83, 0.2);
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     .crown-badge .dot {
@@ -309,7 +313,7 @@
       margin-bottom: 0.4rem;
       line-height: 1.1;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     /* ===== SUBHEAD ===== */
@@ -320,7 +324,7 @@
       margin-bottom: 1.4rem;
       letter-spacing: 0.5px;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     /* ===== DESCRIPTION ===== */
@@ -332,7 +336,7 @@
       max-width: 460px;
       margin: 0 auto 1.8rem auto;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     /* ===== ATTIRE CALLOUT ===== */
@@ -351,7 +355,7 @@
         inset 0 1px 0 rgba(255,255,255,0.8);
       letter-spacing: 0.3px;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     /* ===== DIVIDER ===== */
@@ -362,7 +366,7 @@
       margin: 0 auto 2.2rem auto;
       max-width: 320px;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     .divider::before,
@@ -393,7 +397,7 @@
       text-align: center;
       margin-bottom: 0.5rem;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     .detail-item {
@@ -513,7 +517,7 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       position: relative;
-      z-index: 1;
+      z-index: 4;
     }
 
     .footer-tag span {
@@ -619,9 +623,6 @@
 </head>
 <body>
 
-  <!-- Floating petals canvas -->
-  <canvas id="petals-canvas"></canvas>
-
   <!-- VIDEO HERO -->
   <section class="video-hero">
     <video autoplay muted loop playsinline id="heroVideo">
@@ -638,8 +639,11 @@
     <div class="scroll-hint" id="scrollHint">&#8595; scroll for the party &#8595;</div>
   </section>
 
-  <!-- INVITATION SECTION -->
-  <section class="invitation-section">
+  <!-- INVITATION SECTION (canvas lives inside here) -->
+  <section class="invitation-section" id="invitationSection">
+    <!-- Petals canvas – placed inside section so it only covers invitation area -->
+    <canvas id="petals-canvas"></canvas>
+
     <div class="invitation-card">
 
       <!-- Crown badge -->
@@ -707,11 +711,13 @@
   </section>
 
   <script>
-    /* ===== FLOATING PETALS ===== */
+    /* ===== FLOATING PETALS — inside invitation section only ===== */
     (function() {
       const canvas = document.getElementById('petals-canvas');
       const ctx = canvas.getContext('2d');
+      const section = document.getElementById('invitationSection');
       let W, H;
+
       const petals = [];
       const COUNT = 28;
 
@@ -724,8 +730,14 @@
       ];
 
       function resize() {
-        W = canvas.width  = window.innerWidth;
-        H = canvas.height = window.innerHeight;
+        const rect = section.getBoundingClientRect();
+        W = canvas.width  = rect.width;
+        H = canvas.height = rect.height;
+        // reposition existing petals proportionally if needed
+        for (let p of petals) {
+          p.x = Math.min(p.x, W);
+          p.y = Math.min(p.y, H);
+        }
       }
 
       function randomPetal() {
@@ -769,17 +781,24 @@
         requestAnimationFrame(tick);
       }
 
+      // init
       resize();
       window.addEventListener('resize', resize);
+      // also observe section size changes (just in case)
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => resize());
+        ro.observe(section);
+      }
+
       for (let i = 0; i < COUNT; i++) {
         const p = randomPetal();
-        p.y = Math.random() * H; // spread initial positions
+        p.y = Math.random() * H;
         petals.push(p);
       }
       tick();
     })();
 
-    /* ===== VIDEO LOGIC ===== */
+    /* ===== VIDEO LOGIC (unchanged) ===== */
     (function() {
       const video = document.getElementById('heroVideo');
       const playAgainBtn = document.getElementById('playAgainBtn');
