@@ -43,14 +43,14 @@
 
     /* ===== FLOATING PETALS CANVAS — only over invitation ===== */
     #petals-canvas {
-      position: absolute;        /* relative to .invitation-section */
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
       z-index: 5;
-      border-radius: inherit;   /* matches card if needed, but we keep it over section */
+      border-radius: inherit;
       display: block;
     }
 
@@ -64,16 +64,45 @@
       z-index: 1;
     }
 
+    /* Fallback background image if video fails */
+    .video-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(135deg, #1a0a12 0%, #2d1424 50%, #1a0a12 100%);
+      z-index: 0;
+    }
+
     .video-hero video {
       position: absolute;
-      top: 50%; left: 50%;
-      width: 100%; height: 100%;
+      top: 50%; 
+      left: 50%;
+      width: 100%; 
+      height: 100%;
       object-fit: cover;
       transform: translate(-50%, -50%);
       display: block;
+      z-index: 1;
+      /* Fix for iOS Safari */
+      -webkit-transform: translate(-50%, -50%);
     }
 
-    /* Multi-layer overlay for cinematic depth */
+    /* Fallback poster image */
+    .video-hero .video-poster {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      z-index: 0;
+      display: none;
+      background: #2d1424;
+    }
+
     .video-overlay {
       position: absolute;
       inset: 0;
@@ -196,10 +225,9 @@
         radial-gradient(ellipse at 80% 90%, rgba(255, 160, 200, 0.35) 0%, transparent 50%),
         radial-gradient(ellipse at 60% 40%, rgba(255, 220, 235, 0.3) 0%, transparent 40%),
         linear-gradient(160deg, #ffe4f0 0%, #ffd0e5 40%, #ffe8f2 100%);
-      overflow: hidden;  /* keeps petals inside, no scrollbar from canvas */
+      overflow: hidden;
     }
 
-    /* Decorative blobs behind card */
     .invitation-section::before,
     .invitation-section::after {
       content: '';
@@ -242,7 +270,7 @@
       position: relative;
       overflow: hidden;
       animation: cardEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-      z-index: 3;  /* above the blobs and canvas */
+      z-index: 3;
     }
 
     @keyframes cardEntrance {
@@ -250,7 +278,6 @@
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Shimmer top border */
     .invitation-card::before {
       content: '';
       position: absolute;
@@ -260,7 +287,6 @@
       border-radius: 0 0 4px 4px;
     }
 
-    /* Subtle corner ornament */
     .invitation-card::after {
       content: '';
       position: absolute;
@@ -316,7 +342,6 @@
       z-index: 4;
     }
 
-    /* ===== SUBHEAD ===== */
     .subhead {
       font-size: 1.2rem;
       font-weight: 600;
@@ -327,7 +352,6 @@
       z-index: 4;
     }
 
-    /* ===== DESCRIPTION ===== */
     .description {
       font-size: 1.05rem;
       font-weight: 500;
@@ -339,7 +363,6 @@
       z-index: 4;
     }
 
-    /* ===== ATTIRE CALLOUT ===== */
     .attire-callout {
       display: inline-block;
       background: linear-gradient(135deg, #fff0f6, #ffe4ef);
@@ -358,7 +381,6 @@
       z-index: 4;
     }
 
-    /* ===== DIVIDER ===== */
     .divider {
       display: flex;
       align-items: center;
@@ -435,18 +457,34 @@
       line-height: 1.5;
     }
 
-    .detail-value .highlight {
+    .date-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .date-highlight {
       display: inline-block;
       background: linear-gradient(135deg, #ffe0ed, #ffd0e5);
-      padding: 0.2rem 0.9rem;
+      padding: 0.4rem 1.2rem;
       border-radius: 30px;
       font-weight: 700;
       color: var(--rose-deep);
       border: 1px solid rgba(196, 82, 122, 0.2);
       box-shadow: 0 2px 8px rgba(155, 45, 90, 0.1);
+      line-height: 1.6;
     }
 
-    .detail-value .host-name {
+    .date-highlight .time-row {
+      display: block;
+      font-weight: 600;
+      color: var(--rose-deep);
+      font-size: 0.88rem;
+      letter-spacing: 0.5px;
+      margin-top: 0.1rem;
+    }
+
+    .host-name {
       font-family: 'Playfair Display', serif;
       font-size: 1.45rem;
       font-weight: 700;
@@ -458,12 +496,10 @@
       background-clip: text;
     }
 
-    .time-row {
-      margin-top: 0.35rem;
-      font-weight: 500;
-      color: var(--text-soft);
-      font-size: 0.88rem;
-      letter-spacing: 0.5px;
+    .address-name {
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.2rem;
     }
 
     .address-link {
@@ -581,7 +617,7 @@
         font-size: 0.95rem;
       }
 
-      .detail-value .host-name {
+      .host-name {
         font-size: 1.25rem;
       }
 
@@ -619,17 +655,40 @@
         padding: 0.5rem 1.4rem;
       }
     }
+
+    /* ===== FIXES FOR MOBILE DEVICES ===== */
+    @supports (-webkit-touch-callout: none) {
+      /* iOS Safari specific fixes */
+      .video-hero video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+      }
+    }
+
+    /* Fix for older Android browsers */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
+      .video-hero video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
   </style>
 </head>
 <body>
 
   <!-- VIDEO HERO -->
   <section class="video-hero">
-    <video autoplay muted loop playsinline id="heroVideo">
+    <!-- Poster image fallback -->
+    <img class="video-poster" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' fill='%232d1424'/%3E%3Ctext x='50%25' y='50%25' font-family='Quicksand' font-size='24' fill='%23c4527a' text-anchor='middle' dy='.3em'%3EAshley's 18th%3C/text%3E%3C/svg%3E" alt="Video poster" />
+
+    <video autoplay muted loop playsinline id="heroVideo" preload="metadata" poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' fill='%232d1424'/%3E%3Ctext x='50%25' y='50%25' font-family='Quicksand' font-size='24' fill='%23c4527a' text-anchor='middle' dy='.3em'%3EAshley's 18th%3C/text%3E%3C/svg%3E">
       <source src="2026-07-11 03-20-34.mkv" type="video/x-matroska" />
       <source src="2026-07-11 03-20-34.mp4" type="video/mp4" />
       <source src="2026-07-11 03-20-34.webm" type="video/webm" />
-      Your browser does not support the video tag.
+      <!-- Fallback text -->
+      <p>Your browser does not support the video tag.</p>
     </video>
 
     <button class="play-again-btn" id="playAgainBtn">&#9654; Play Again</button>
@@ -639,35 +698,28 @@
     <div class="scroll-hint" id="scrollHint">&#8595; scroll for the party &#8595;</div>
   </section>
 
-  <!-- INVITATION SECTION (canvas lives inside here) -->
+  <!-- INVITATION SECTION -->
   <section class="invitation-section" id="invitationSection">
-    <!-- Petals canvas – placed inside section so it only covers invitation area -->
     <canvas id="petals-canvas"></canvas>
 
     <div class="invitation-card">
 
-      <!-- Crown badge -->
       <div class="crown-badge">
         <span class="dot"></span>
         Eighteenth Birthday
         <span class="dot"></span>
       </div>
 
-      <!-- Main title -->
       <h1 class="main-title">Ashley's Freshly Eighteen</h1>
 
-      <!-- Subhead -->
       <div class="subhead">Get ready for a splash of fun!</div>
 
-      <!-- Description -->
       <p class="description">
         Join us for a delightfully pink celebration. Think pink lemonade vibes and dazzling company.
       </p>
 
-      <!-- Attire callout -->
       <div class="attire-callout">Don your favorite pink attire and let's make some memories!</div>
 
-      <!-- Divider -->
       <div class="divider">
         <span class="divider-gem"></span>
       </div>
@@ -677,21 +729,27 @@
 
         <div class="detail-item">
           <div class="detail-label">Hosted By</div>
-          <div class="detail-value"><span class="host-name">Ashley Elyza</span></div>
+          <div class="detail-value">
+            <span class="host-name">Ashley Elyza</span>
+          </div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Date</div>
           <div class="detail-value">
-            <span class="highlight">Wednesday, July 15</span>
-            <div class="time-row">6:00 PM +04</div>
+            <div class="date-block">
+              <span class="date-highlight">
+                Wednesday, July 15
+                <span class="time-row">6:00 PM +04</span>
+              </span>
+            </div>
           </div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Address</div>
           <div class="detail-value">
-            <div style="font-weight: 700; color: var(--text-dark); margin-bottom: 0.2rem;">Mykonos Resort</div>
+            <div class="address-name">Mykonos Resort</div>
             <a href="https://maps.app.goo.gl/X8wtTxh6WZgTrE5D8?g_st=i..." target="_blank" class="address-link" rel="noopener">
               View on Map
             </a>
@@ -700,7 +758,6 @@
 
       </div>
 
-      <!-- Footer -->
       <div class="footer-tag">
         <span>Pink Dress Code</span>
         <span>July 15, 2026</span>
@@ -711,7 +768,7 @@
   </section>
 
   <script>
-    /* ===== FLOATING PETALS — inside invitation section only ===== */
+    /* ===== FLOATING PETALS ===== */
     (function() {
       const canvas = document.getElementById('petals-canvas');
       const ctx = canvas.getContext('2d');
@@ -733,7 +790,6 @@
         const rect = section.getBoundingClientRect();
         W = canvas.width  = rect.width;
         H = canvas.height = rect.height;
-        // reposition existing petals proportionally if needed
         for (let p of petals) {
           p.x = Math.min(p.x, W);
           p.y = Math.min(p.y, H);
@@ -781,10 +837,8 @@
         requestAnimationFrame(tick);
       }
 
-      // init
       resize();
       window.addEventListener('resize', resize);
-      // also observe section size changes (just in case)
       if (window.ResizeObserver) {
         const ro = new ResizeObserver(() => resize());
         ro.observe(section);
@@ -798,7 +852,7 @@
       tick();
     })();
 
-    /* ===== VIDEO LOGIC (unchanged) ===== */
+    /* ===== VIDEO LOGIC ===== */
     (function() {
       const video = document.getElementById('heroVideo');
       const playAgainBtn = document.getElementById('playAgainBtn');
@@ -877,6 +931,16 @@
 
       video.addEventListener('playing', function() { hasPlayedOnce = true; isPlaying = true; });
       video.addEventListener('ended',  function() { showPlayAgainButton(); isPlaying = false; });
+
+      // Handle video errors
+      video.addEventListener('error', function(e) {
+        console.log('Video error:', e);
+        // Show poster/fallback
+        const poster = document.querySelector('.video-poster');
+        if (poster) poster.style.display = 'block';
+        // Still show scroll hint
+        scrollHint.classList.remove('hidden');
+      });
     })();
   </script>
 
